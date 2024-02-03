@@ -1,0 +1,4 @@
+
+'''
+requirements.txt should contain all your scripts' python module dependencies, and follow the requirements format
+'''
