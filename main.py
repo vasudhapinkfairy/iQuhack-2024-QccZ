@@ -80,10 +80,10 @@ def loss_function_ccz_dual_rail(U):
     + np.abs(get_alpha([0,0,0,0,0,0], U) - get_alpha([0,1,1,0,1,1], U))**2 
     + np.abs(get_alpha([0,1,1,0,1,1], U) - get_alpha([1,0,1,1,0,1], U))**2
     + np.abs(get_alpha([1,0,1,1,0,1], U) - get_alpha([1,1,0,1,1,0], U))**2
-    + np.abs(get_alpha([1,1,0,1,1,0], U) + get_alpha([0,0,1,0,0,1], U))**2
+    + np.abs(get_alpha([1,1,0,1,1,0], U) - get_alpha([0,0,1,0,0,1], U))**2
     + np.abs(get_alpha([0,0,1,0,0,1], U) - get_alpha([0,1,0,0,1,0], U))**2
     + np.abs(get_alpha([0,1,0,0,1,0], U) - get_alpha([1,0,0,1,0,0], U))**2
-    + np.abs(get_alpha([1,0,0,1,0,0], U) - get_alpha([1,1,1,1,1,1], U))**2
+    + np.abs(get_alpha([1,0,0,1,0,0], U) + get_alpha([1,1,1,1,1,1], U))**2
 
     undesired_gate_loss = 0
 
