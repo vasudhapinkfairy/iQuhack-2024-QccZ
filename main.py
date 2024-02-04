@@ -117,7 +117,7 @@ def get_CCZ_unitary():
     timer = time.time()
 
     try:
-        for _ in range(100):
+        for _ in range(1000):
 
             U = unitary_group.rvs(6)
 
@@ -140,9 +140,33 @@ def get_CCZ_unitary():
     return best_U
 
 
+def embed_ccz_dual_rail_encoding(U):
+
+    import numpy as np
+
+    # Create Matrix A (larger matrix)
+    A = np.identity(9, dtype=np.complex128)
+
+    # Create Matrix B (smaller matrix)
+    # B = np.array([[1, 0, 2],
+    #            [0, 3, 0],
+    #            [4, 0, 0]])
+
+    # Specify the rows and columns where you want to insert Matrix B
+    indices_to_insert = [1, 3, 5, 6, 7, 8]  # Rows 1, 2, and 3
+    # cols_to_insert = [2, 3, 4]  # Columns 2, 3, and 4
+
+    # Insert Matrix B into Matrix A
+    for i, row in enumerate(indices_to_insert):
+        for j, col in enumerate(indices_to_insert):
+            A[row, col] = U[i, j]
+
+    return A
+
 def get_CCZ():
 
     unitary = get_CCZ_unitary()
+    unitary = embed_ccz_dual_rail_encoding(unitary)
     M = pcvl.Matrix(unitary)
     Unitary_matrix = comp.Unitary(U=M)
 
@@ -152,10 +176,12 @@ def get_CCZ():
     circuit.describe()
 
     p = pcvl.Processor("Naive", circuit)
-    p.add_herald(3,1)  # Third mode is heralded (1 photon in, 1 photon expected out)
-    p.add_herald(4,1)  # Fourth mode is heralded (1 photon in, 1 photon expected out)
-    p.add_herald(5,1)  # Fifth mode is heralded (1 photon in, 1 photon expected out)
+    p.add_herald(6,1)  # Third mode is heralded (1 photon in, 1 photon expected out)
+    p.add_herald(7,1)  # Fourth mode is heralded (1 photon in, 1 photon expected out)
+    p.add_herald(8,1)  # Fifth mode is heralded (1 photon in, 1 photon expected out)
 
-    pcvl.pdisplay(p, recursive=True)
+    # pcvl.pdisplay(p, recursive=True)
 
     return p
+
+# get_CCZ()
