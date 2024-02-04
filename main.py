@@ -255,11 +255,6 @@ def embed_ccz_dual_rail_encoding(U):
     # Create Matrix A (larger matrix)
     A = np.identity(9, dtype=np.complex128)
 
-    # Create Matrix B (smaller matrix)
-    # B = np.array([[1, 0, 2],
-    #            [0, 3, 0],
-    #            [4, 0, 0]])
-
     # Specify the rows and columns where you want to insert Matrix B
     indices_to_insert = [1, 3, 5, 6, 7, 8]  # Rows 1, 2, and 3
     # cols_to_insert = [2, 3, 4]  # Columns 2, 3, and 4
@@ -277,11 +272,6 @@ def embed_bonus_hybrid_encoding(U):
 
     # Create Matrix A (larger matrix)
     A = np.identity(9, dtype=np.complex128)
-
-    # Create Matrix B (smaller matrix)
-    # B = np.array([[1, 0, 2],
-    #            [0, 3, 0],
-    #            [4, 0, 0]])
 
     # Specify the rows and columns where you want to insert Matrix B
     indices_to_insert = [1, 3, 5, 6, 7, 8]  # Rows 1, 2, and 3
@@ -314,5 +304,6 @@ def get_CCZ():
     # pcvl.pdisplay(p, recursive=True)
 
     return p
+
 
 # get_CCZ()
