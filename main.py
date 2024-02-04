@@ -16,7 +16,9 @@ import perceval.components as comp
 
 def get_alpha(index: list, unitary: np.ndarray):
 
-    input_mode_occupations, output_mode_occupations = index[0:3] + [1,1,1], index[3:6] + [1,1,1]
+    input_length = int(len(index) / 2)
+
+    input_mode_occupations, output_mode_occupations = index[0:input_length] + [1,1,1], index[input_length:] + [1,1,1]
 
     n_input = sum(input_mode_occupations)
     n_output = sum(output_mode_occupations)
@@ -103,10 +105,116 @@ def loss_function_ccz_dual_rail(U):
 
     return loss
 
+def loss_function_ccz_hybrid(U):
+    desired_gate_loss = 0
+    + np.abs(get_alpha([1,0,0,0,1,0,1,0,0,0,1,0], U) - get_alpha([1,0,0,0,0,1,1,0,0,0,0,1], U))**2 
+    + np.abs(get_alpha([1,0,0,0,0,1,1,0,0,0,0,1], U) - get_alpha([0,1,0,0,1,0,0,1,0,0,1,0], U))**2
+    + np.abs(get_alpha([0,1,0,0,1,0,0,1,0,0,1,0], U) - get_alpha([0,1,0,0,0,1,0,1,0,0,0,1], U))**2
+    + np.abs(get_alpha([0,1,0,0,0,1,0,1,0,0,0,1], U) - get_alpha([0,0,1,0,1,0,0,0,1,0,1,0], U))**2
+    + np.abs(get_alpha([0,0,1,0,1,0,0,0,1,0,1,0], U) - get_alpha([0,0,1,0,0,1,0,0,1,0,0,1], U))**2
+    + np.abs(get_alpha([0,0,1,0,0,1,0,0,1,0,0,1], U) - get_alpha([0,0,0,1,1,0,0,0,0,1,1,0], U))**2
+    + np.abs(get_alpha([0,0,0,1,1,0,0,0,0,1,1,0], U) + get_alpha([0,0,0,1,0,1,0,0,0,1,0,1], U))**2
+
+    undesired_gate_loss = 0
+
+    for input_state in [[1,0,0,0,1,0], [1,0,0,0,0,1], [0,1,0,0,1,0], [0,1,0,0,0,1], [0,0,1,0,1,0], [0,0,1,0,0,1], [0,0,0,1,1,0], [0,0,0,1,0,1]]:
+        
+        particle_number = np.sum(input_state)
+
+        output_states = get_partitions_permutations(n=particle_number, k=6)
+
+        for output_state in output_states:
+            if input_state != output_state:
+                
+                index=input_state + list(output_state) 
+                undesired_gate_loss += np.abs(get_alpha(index=index, unitary=U))**2
+
+    loss = desired_gate_loss + undesired_gate_loss
+
+    return loss
+
+def loss_function_toffoli_hybrid(U):
+    desired_gate_loss = 0
+    + np.abs(get_alpha([1,0,0,0,1,0,1,0,0,0,1,0], U) - get_alpha([1,0,0,0,0,1,1,0,0,0,0,1], U))**2 
+    + np.abs(get_alpha([1,0,0,0,0,1,1,0,0,0,0,1], U) - get_alpha([0,1,0,0,1,0,0,1,0,0,1,0], U))**2
+    + np.abs(get_alpha([0,1,0,0,1,0,0,1,0,0,1,0], U) - get_alpha([0,1,0,0,0,1,0,1,0,0,0,1], U))**2
+    + np.abs(get_alpha([0,1,0,0,0,1,0,1,0,0,0,1], U) - get_alpha([0,0,1,0,1,0,0,0,1,0,1,0], U))**2
+    + np.abs(get_alpha([0,0,1,0,1,0,0,0,1,0,1,0], U) - get_alpha([0,0,1,0,0,1,0,0,1,0,0,1], U))**2
+    + np.abs(get_alpha([0,0,1,0,0,1,0,0,1,0,0,1], U) - get_alpha([0,0,0,1,1,0,0,0,0,1,0,1], U))**2
+    + np.abs(get_alpha([0,0,0,1,1,0,0,0,0,1,0,1], U) - get_alpha([0,0,0,1,0,1,0,0,0,1,1,0], U))**2
+
+    undesired_gate_loss = 0
+
+    for input_state in [[1,0,0,0,1,0], [1,0,0,0,0,1], [0,1,0,0,1,0], [0,1,0,0,0,1], [0,0,1,0,1,0], [0,0,1,0,0,1], [0,0,0,1,1,0], [0,0,0,1,0,1]]:
+        
+        particle_number = np.sum(input_state)
+
+        output_states = get_partitions_permutations(n=particle_number, k=6)
+
+        if input_state == [0,0,0,1,1,0]:
+
+            for output_state in output_states:
+
+                if [0,0,0,1,0,1] != output_state:
+                    
+                    index=input_state + list(output_state) 
+                    undesired_gate_loss += np.abs(get_alpha(index=index, unitary=U))**2
+
+        elif input_state == [0,0,0,1,0,1]:
+            
+            for output_state in output_states:
+
+                if [0,0,0,1,1,0] != output_state:
+                    
+                    index=input_state + list(output_state) 
+                    undesired_gate_loss += np.abs(get_alpha(index=index, unitary=U))**2
+
+        else:
+            for output_state in output_states:
+
+                if input_state != output_state:
+                    
+                    index=input_state + list(output_state) 
+                    undesired_gate_loss += np.abs(get_alpha(index=index, unitary=U))**2
+
+    loss = desired_gate_loss + undesired_gate_loss
+
+    return loss
+
+def loss_function_bonus_hybrid(U):
+
+    desired_gate_loss = 0
+    + np.abs(get_alpha([0,0,0,0,0,0], U) - get_alpha([0,0,1,0,0,1], U))**2 
+    + np.abs(get_alpha([0,0,1,0,0,1], U) - get_alpha([0,1,0,0,1,0], U))**2
+    + np.abs(get_alpha([0,1,0,0,1,0], U) + get_alpha([0,1,1,0,1,1], U))**2
+    + np.abs(get_alpha([0,1,1,0,1,1], U) + get_alpha([1,0,0,1,0,0], U))**2
+    + np.abs(get_alpha([1,0,0,1,0,0], U) + get_alpha([1,0,1,1,0,1], U))**2
+    + np.abs(get_alpha([1,0,1,1,0,1], U) + get_alpha([1,1,0,1,1,0], U))**2
+    + np.abs(get_alpha([1,1,0,1,1,0], U) - get_alpha([1,1,1,1,1,1], U))**2
+
+    undesired_gate_loss = 0
+
+    for input_state in [[0,0,0], [0,0,1], [0,1,0], [0,1,1], [1,0,0], [1,0,1], [1,1,0], [1,1,1]]:
+        
+        particle_number = np.sum(input_state)
+
+        output_states = get_partitions_permutations(n=particle_number, k=3)
+
+        for output_state in output_states:
+            if input_state != output_state:
+                
+                index=input_state + list(output_state) 
+                undesired_gate_loss += np.abs(get_alpha(index=index, unitary=U))**2
+
+    loss = desired_gate_loss + undesired_gate_loss
+
+    return loss
 
 def get_success_prob(U):
     return np.abs(get_alpha(index=[0,0,0,0,0,0], unitary=U))**2
 
+def get_success_prob_for_hybrid_toffoli_ccz(U):
+    return np.abs(get_alpha(index=[0,0,0,0,0,0,0,0,0,0,0,0], unitary=U))**2
 
 def get_CCZ_unitary():
 
@@ -141,6 +249,29 @@ def get_CCZ_unitary():
 
 
 def embed_ccz_dual_rail_encoding(U):
+
+    import numpy as np
+
+    # Create Matrix A (larger matrix)
+    A = np.identity(9, dtype=np.complex128)
+
+    # Create Matrix B (smaller matrix)
+    # B = np.array([[1, 0, 2],
+    #            [0, 3, 0],
+    #            [4, 0, 0]])
+
+    # Specify the rows and columns where you want to insert Matrix B
+    indices_to_insert = [1, 3, 5, 6, 7, 8]  # Rows 1, 2, and 3
+    # cols_to_insert = [2, 3, 4]  # Columns 2, 3, and 4
+
+    # Insert Matrix B into Matrix A
+    for i, row in enumerate(indices_to_insert):
+        for j, col in enumerate(indices_to_insert):
+            A[row, col] = U[i, j]
+
+    return A
+
+def embed_bonus_hybrid_encoding(U):
 
     import numpy as np
 
